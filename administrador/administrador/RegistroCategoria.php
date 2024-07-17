@@ -8,7 +8,7 @@ if ($varsesion == null || $varsesion == '') {
 }
 
 // Obtener categorías registradas
-include('permisos/conexion.php');
+include ('permisos/conexion.php');
 $consultaCategorias = $pdo->query("SELECT * FROM categorias");
 $categorias = $consultaCategorias->fetchAll(PDO::FETCH_ASSOC);
 
@@ -47,17 +47,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link href="../css2/responsive.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10">
     <style>
-    .form-container {
-        background-color: #f8f9fa;
-        border: 1px solid #ced4da;
-        border-radius: 10px;
-        padding: 20px;
-        margin-top: 20px;
-        position: fixed;
-        top: 0px;
-        right: -20px;
-        width: 300px;
-    }
+        .form-container {
+            background-color: #f8f9fa;
+            border: 1px solid #ced4da;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            position: fixed;
+            top: 0px;
+            right: -20px;
+            width: 300px;
+        }
     </style>
 </head>
 
@@ -79,6 +79,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </form>
             <!-- Sección de la lista de categorías -->
             <div class="col-md-8 p-5">
+                <div class="col-12 p-3">
+                    <input type="text" id="searchInput" class="form-control"
+                        placeholder="Buscar por nombre de categoría">
+                </div>
                 <h1 class="text-center p-3">Lista de Categorías</h1>
                 <div class="col-12 p-3 form-container">
                     <div class="categorias-container" style="max-height: 400px; overflow-y: auto;">
@@ -91,15 +95,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </thead>
                             <tbody>
                                 <?php foreach ($categorias as $categoria): ?>
-                                <tr>
-                                    <td><?php echo $categoria['nombre']; ?></td>
-                                    <td>
-                                        <a href="editarCategoria.php?id=<?php echo $categoria['id']; ?>"><img
-                                                src="../images/modificar.png" alt="Editar"></a>
-                                        <a href="categorias/eliminarCategoria.php?id=<?php echo $categoria['id']; ?>"><img
-                                                src="../images/eliminar.png" alt="Eliminar"></a>
-                                    </td>
-                                </tr>
+                                    <tr>
+                                        <td><?php echo $categoria['nombre']; ?></td>
+                                        <td>
+                                            <a href="editarCategoria.php?id=<?php echo $categoria['id']; ?>"><img
+                                                    src="../images/modificar.png" alt="Editar"></a>
+                                            <a href="categorias/eliminarCategoria.php?id=<?php echo $categoria['id']; ?>"><img
+                                                    src="../images/eliminar.png" alt="Eliminar"></a>
+                                        </td>
+                                    </tr>
                                 <?php endforeach; ?>
                             </tbody>
                         </table>
@@ -113,7 +117,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $alertType = $_SESSION['alert']['type'];
         $alertMessage = $_SESSION['alert']['message'];
         unset($_SESSION['alert']);
-    
+
         echo "
         <script src='https://cdn.jsdelivr.net/npm/sweetalert2@10'></script>
         <script>
@@ -127,6 +131,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     ?>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            // Función para filtrar la tabla de categorías según el texto de búsqueda
+            $('#searchInput').on('keyup', function () {
+                var searchText = $(this).val().toLowerCase();
+
+                $('.table tbody tr').each(function () {
+                    var nombre = $(this).find('td:nth-child(1)').text().toLowerCase();
+                    $(this).toggle(nombre.indexOf(searchText) !== -1);
+                });
+            });
+        });
+    </script>
     <script src="../js2/bootstrap.js"></script>
     </br>
     <?php include '../footer/footer.php'; ?>
