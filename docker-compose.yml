@@ -1,39 +1,63 @@
 version: "3.1"
 services:
-    db:
-        image: mysql
-        ports: 
-            - "3306:3306"
-        command: --default-authentication-plugin=mysql_native_password
-        environment:
-            MYSQL_DATABASE: dbname
-            MYSQL_PASSWORD: test
-            MYSQL_ROOT_PASSWORD: test 
-        volumes:
-            - ./dump:/docker-entrypoint-initdb.d
-            - ./conf:/etc/mysql/conf.d
-            - persistent:/var/lib/mysql
-        networks:
-            - default
-    www:
-        build: .
-        ports: 
-            - "80:80"
-        volumes:
-            - ./www:/var/www/html
-        links:
-            - db
-        networks:
-            - default
-    phpmyadmin:
-        image: phpmyadmin/phpmyadmin
-        links: 
-            - db:db
-        ports:
-            - 8000:80
-        environment:
-            MYSQL_USER: root
-            MYSQL_PASSWORD: test
-            MYSQL_ROOT_PASSWORD: test 
+
+  www:
+    build: ./www
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./www:/var/www/html
+    networks:
+      - backend
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    environment:
+      PMA_HOST: proyecto.cjoekme2uywt.us-east-1.rds.amazonaws.com
+      PMA_PORT: 3306
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: Alisal2023
+      MYSQL_ROOT_PASSWORD: Alisal2023
+    ports:
+      - "7000:80"
+    networks:
+      - backend
+
+  administrador:
+    build: ./administrador
+    ports:
+      - "7001:80"
+    volumes:
+      - ./administrador:/var/www/html
+      - ./administrador/images:/var/www/html/images
+    networks:
+      - backend
+
+  camarero:
+    build: ./camarero
+    ports:
+      - "7002:80"
+    depends_on:
+      - administrador
+    volumes:
+      - ./camarero:/var/www/html
+    networks:
+      - backend
+
+  cocinero:
+    build: ./cocinero
+    ports:
+      - "7003:80"
+    depends_on:
+      - administrador
+    volumes:
+      - ./cocinero:/var/www/html
+    networks:
+      - backend
+
+networks:
+  backend:
+
 volumes:
-    persistent:
+  persistent:

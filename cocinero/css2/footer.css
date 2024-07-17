@@ -1,0 +1,19 @@
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.container-flex {
+    flex: 1;
+}
+
+.footer-container {
+    flex-shrink: 0;
+    margin-top: auto;
+    padding-top: 20px;
+    background-color: #363636; /* Fondo negro */
+    color: white; /* Texto blanco */
+    text-align: center; /* Centra el texto horizontalmente */
+}   
+

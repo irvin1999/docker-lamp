@@ -1,0 +1,21 @@
+/* Estilo base para el botón */
+.cambiar_estado {
+    padding: 10px 20px; /* Tamaño del botón */
+    border: none;
+    border-radius: 5px; /* Bordes redondeados */
+    cursor: pointer;
+    font-weight: bold;
+    text-transform: uppercase; /* Texto en mayúsculas */
+}
+
+/* Estilo para el botón de "Habilitar" */
+.btn-habilitar {
+    background-color: blue; /* Fondo azul */
+    color: white; /* Texto blanco */
+}
+
+/* Estilo para el botón de "Deshabilitar" */
+.btn-deshabilitar {
+    background-color: red; /* Fondo rojo */
+    color: white; /* Texto blanco */
+}
