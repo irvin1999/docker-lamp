@@ -10,7 +10,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Verificar si el usuario es el administrador predeterminado
     $usuario_admin = "admin";
-    $dni_admin = "admin"; // DNI del administrador predeterminado
+    $dni_admin = "ADMIN"; // DNI del administrador predeterminado
     $password_admin = "admin"; // Contraseña del administrador predeterminado
 
     if ($dni_usuario == $dni_admin && md5($password) == md5($password_admin)) {

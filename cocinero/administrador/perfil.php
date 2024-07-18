@@ -33,6 +33,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $dni = $_POST["dni"];
     $contrasena = $_POST["contrasena"];
 
+    // Convertir el DNI a mayúsculas
+    $dni = strtoupper($dni);
+
     // Verificar si el DNI ya existe en la base de datos
     $sql_check_dni = "SELECT COUNT(*) AS count FROM usuarios WHERE dni = :dni AND id != :idUsuario";
     $stmt_check_dni = $pdo->prepare($sql_check_dni);

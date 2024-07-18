@@ -2,7 +2,7 @@
 // Verificar si el usuario es administrador predeterminado
 function verificarSiEsAdminPredeterminado()
 {
-    if (isset ($_SESSION["usuario"]) && $_SESSION["usuario"] == "admin" && isset ($_SESSION["es_admin_predeterminado"]) && $_SESSION["es_admin_predeterminado"]) {
+    if (isset($_SESSION["usuario"]) && $_SESSION["usuario"] == "admin" && isset($_SESSION["es_admin_predeterminado"]) && $_SESSION["es_admin_predeterminado"]) {
         return true;
     }
     return false;
@@ -17,8 +17,8 @@ if ($varsesion == null || $varsesion = '') {
 }
 
 // Obtener platos registrados
-include ('../administrador/permisos/conexion.php');
-$consultaPlatos = $pdo->query("SELECT * FROM platos");
+include('../administrador/permisos/conexion.php');
+$consultaPlatos = $pdo->query("SELECT p.*, c.nombre AS categoria FROM platos p JOIN categorias c ON p.id_categoria = c.id");
 $platos = $consultaPlatos->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
@@ -55,77 +55,82 @@ $platos = $consultaPlatos->fetchAll(PDO::FETCH_ASSOC);
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10">
     <style>
-        .form-container {
-            background-color: #f8f9fa;
-            /* Color de fondo */
-            border: 1px solid #ced4da;
-            /* Borde */
-            border-radius: 10px;
-            /* Bordes redondos */
-            padding: 20px;
-            /* Espacio interno */
-            margin-top: 20px;
-            /* Sombra */
-            position: fixed;
-            /* Posición fija */
-            top: 0px;
-            /* Espacio superior */
-            right: -20px;
-            /* Alineado a la derecha */
-            width: 300px;
-            /* Ancho del formulario */
-        }
+    .form-container {
+        background-color: #f8f9fa;
+        /* Color de fondo */
+        border: 1px solid #ced4da;
+        /* Borde */
+        border-radius: 10px;
+        /* Bordes redondos */
+        padding: 20px;
+        /* Espacio interno */
+        margin-top: 20px;
+        /* Sombra */
+        position: fixed;
+        /* Posición fija */
+        top: 0px;
+        /* Espacio superior */
+        right: -20px;
+        /* Alineado a la derecha */
+        width: 300px;
+        /* Ancho del formulario */
+    }
     </style>
 </head>
 
 <body class="sub_page">
     <div class="hero_area">
-        <?php include '../administrador/menuadmin.php'; ?> <!-- Incluir el menú -->
+        <?php include '../administrador/menuadmin.php'; ?>
+        <!-- Incluir el menú -->
     </div>
     <div class="container-fluid">
-        <div class="row justify-content-center"> <!-- Centra el contenido horizontalmente -->
+        <div class="row justify-content-center">
+            <!-- Centra el contenido horizontalmente -->
             <div class="col-10 p-3">
                 <div class="col-12 p-3 form-container">
-            	<div class="col-12 p-3">
-                    <input type="text" id="searchInput" class="form-control" placeholder="Buscar por nombre de plato">
-            	</div>
-                <h1 class="text-center p-3">Lista de Platos</h1>
-                <div class="platos-container" style="max-height: 400px; overflow-y: auto;">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th scope="col">Nombre</th>
-                            <th scope="col">Precio</th>
-                            <th scope="col">Imagen</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($platos as $plato): ?>
-                            <tr>
-                                <td>
-                                    <?php echo $plato['nombre']; ?>
-                                </td>
-                                <td>$
-                                    <?php echo $plato['precio']; ?>
-                                </td>
-                                <td>
-                                    <?php echo '<img src="../../administrador/images' . $plato['imagen'] . '" alt="Plato" width="100" height="100">'; ?>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-		</div>
+                    <div class="col-12 p-3">
+                        <input type="text" id="searchInput" class="form-control"
+                            placeholder="Buscar por nombre de plato">
+                    </div>
+                    <h1 class="text-center p-3">Lista de Platos</h1>
+                    <div class="platos-container" style="max-height: 400px; overflow-y: auto;">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Nombre</th>
+                                    <th scope="col">Cateogira</th>
+                                    <th scope="col">Precio</th>
+                                    <th scope="col">Imagen</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($platos as $plato) : ?>
+                                <tr>
+                                    <td>
+                                        <?php echo $plato['nombre']; ?>
+                                    </td>
+                                    <td><?php echo $plato['categoria']; ?></td>
+                                    <td>$
+                                        <?php echo $plato['precio']; ?>
+                                    </td>
+                                    <td>
+                                        <?php echo '<img src="../../administrador/images' . $plato['imagen'] . '" alt="Plato" width="100" height="100">'; ?>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-</div>
     <?php
-    if (isset ($_SESSION['alert'])) {
+    if (isset($_SESSION['alert'])) {
         $alertType = $_SESSION['alert']['type'];
         $alertMessage = $_SESSION['alert']['message'];
         unset($_SESSION['alert']); // Limpiar la sesión para evitar que la alerta se muestre nuevamente
-    
+
         echo "
     <script src='https://cdn.jsdelivr.net/npm/sweetalert2@10'></script>
     <script>
@@ -141,30 +146,30 @@ $platos = $consultaPlatos->fetchAll(PDO::FETCH_ASSOC);
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <!-- Agrega este código en la sección head de tu página HTML -->
     <script>
-        $(document).ready(function () {
-            // Función para filtrar la tabla de platos según el texto de búsqueda
-            $('#searchInput').on('keyup', function () {
-                var searchText = $(this).val().toLowerCase();
-                var searchWords = searchText.split(/\s+/); // Dividir el texto de búsqueda por espacios
+    $(document).ready(function() {
+        // Función para filtrar la tabla de platos según el texto de búsqueda
+        $('#searchInput').on('keyup', function() {
+            var searchText = $(this).val().toLowerCase();
+            var searchWords = searchText.split(/\s+/); // Dividir el texto de búsqueda por espacios
 
-                $('.table tbody tr').each(function () {
-                    var nombre = $(this).find('td:nth-child(1)').text().toLowerCase();
-                    var match = true;
+            $('.table tbody tr').each(function() {
+                var nombre = $(this).find('td:nth-child(1)').text().toLowerCase();
+                var match = true;
 
-                    // Verificar si todas las palabras de búsqueda están presentes en el nombre del plato
-                    for (var i = 0; i < searchWords.length; i++) {
-                        var word = searchWords[i];
-                        if (nombre.indexOf(word) === -1) {
-                            match = false;
-                            break;
-                        }
+                // Verificar si todas las palabras de búsqueda están presentes en el nombre del plato
+                for (var i = 0; i < searchWords.length; i++) {
+                    var word = searchWords[i];
+                    if (nombre.indexOf(word) === -1) {
+                        match = false;
+                        break;
                     }
+                }
 
-                    // Mostrar u ocultar la fila según si hay coincidencias
-                    $(this).toggle(match);
-                });
+                // Mostrar u ocultar la fila según si hay coincidencias
+                $(this).toggle(match);
             });
         });
+    });
     </script>
     <script type="text/javascript" src="../js2/jquery-3.4.1.min.js"></script>
     <script type="text/javascript" src="../js2/bootstrap.js"></script>

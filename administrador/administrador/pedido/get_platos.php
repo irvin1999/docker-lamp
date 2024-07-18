@@ -1,6 +1,6 @@
 <?php
 session_start();
-include('permisos/conexion.php');
+include('../permisos/conexion.php');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id_categoria = $_POST['id_categoria'];
@@ -12,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     while ($data = $query->fetch(PDO::FETCH_ASSOC)) {
         echo '<div class="col-md-3 plato-item" data-categoria="' . $data['id_categoria'] . '">
                 <div class="col-12">
-                    <img src="../../administrador/images' . $data['imagen'] . '" class="product-image"
+                    <img src="../images' . $data['imagen'] . '" class="product-image"
                          alt="Product Image" style="max-width: 100%; height: auto;">
                 </div>
                 <h6 class="my-3">' . $data['nombre'] . '</h6>

@@ -241,7 +241,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['realizar_pedido'])) {
 
             // Obtener platos de la categoría seleccionada
             $.ajax({
-                url: "get_platos.php", // Archivo que devolverá los platos por categoría
+                url: "pedido/get_platos.php", // Archivo que devolverá los platos por categoría
                 method: "POST",
                 data: {
                     id_categoria: categoriaId

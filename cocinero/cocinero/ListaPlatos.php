@@ -18,7 +18,7 @@ if ($varsesion == null || $varsesion = '') {
 
 // Obtener platos registrados
 include ('../administrador/permisos/conexion.php');
-$consultaPlatos = $pdo->query("SELECT * FROM platos");
+$consultaPlatos = $pdo->query("SELECT p.*, c.nombre AS categoria FROM platos p JOIN categorias c ON p.id_categoria = c.id");
 $platos = $consultaPlatos->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
@@ -95,6 +95,7 @@ $platos = $consultaPlatos->fetchAll(PDO::FETCH_ASSOC);
                     <thead>
                         <tr>
                             <th scope="col">Nombre</th>
+                            <th scope="col">Categoria</th>
                             <th scope="col">Precio</th>
                             <th scope="col">Imagen</th>
                         </tr>
@@ -105,6 +106,7 @@ $platos = $consultaPlatos->fetchAll(PDO::FETCH_ASSOC);
                                 <td>
                                     <?php echo $plato['nombre']; ?>
                                 </td>
+                                <td><?php echo $plato['categoria']; ?></td>
                                 <td>$
                                     <?php echo $plato['precio']; ?>
                                 </td>
