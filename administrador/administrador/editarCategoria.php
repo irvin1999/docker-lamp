@@ -148,6 +148,7 @@ $categorias = $consultaCategorias->fetchAll(PDO::FETCH_ASSOC);
         });
     </script>
     <script type="text/javascript" src="../js2/bootstrap.js"></script>
+    </br>
     <?php include '../footer/footer.php'; ?>
 </body>
 

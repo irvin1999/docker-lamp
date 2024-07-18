@@ -220,7 +220,7 @@ button:hover {
                <span class="input-item">
                   <i class="fa fa-user-circle"></i>
                </span>
-               <input class="form-input" name="dni" type="text" placeholder="DNI o NIE" required>
+               <input class="form-input" name="dni" type="text" placeholder="DNI o NIE - mayuscula" required>
                <br>
                <span class="input-item">
                   <i class="fa fa-key"></i>

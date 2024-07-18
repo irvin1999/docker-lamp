@@ -18,6 +18,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $dni = $_POST['dni']; // Nuevo campo para el DNI
     $nuevaContrasena = $_POST['nueva_contrasena']; // Agregar esta línea si es necesario
 
+    // Convertir el DNI a mayúsculas
+    $dni = strtoupper($dni);
+
     try {
         // Construir la consulta SQL base
         $sqlBase = "UPDATE usuarios SET nombre = :nombre, apellido = :apellido, rol = :rol, dni = :dni";
@@ -84,4 +87,3 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     header("Location: ../agregar.php");
     exit();
 }
-?>

@@ -13,6 +13,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $contrasena = isset($_POST['contrasena']) ? md5($_POST['contrasena']) : '';
     $rol = isset($_POST['rol']) ? $_POST['rol'] : '';
 
+    // Convertir el DNI a mayúsculas
+    $dni = strtoupper($dni);
+
     // Verificar que los campos requeridos no estén vacíos
     if (!empty($nombre) && !empty($apellido) && !empty($dni) && !empty($contrasena) && !empty($rol)) {
         // Verificar si el usuario ya existe en la base de datos
@@ -68,4 +71,3 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 } else {
     echo "La solicitud no es válida.";
 }
-?>

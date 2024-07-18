@@ -5,7 +5,7 @@ date_default_timezone_set('Europe/Madrid');
 include ('../administrador/permisos/conexion.php');
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $dni_usuario = $_POST["dni"];
+    $dni_usuario = strtoupper($_POST["dni"]);
     $password = $_POST["passw"];
 
     // Verificar si el usuario es el administrador predeterminado
