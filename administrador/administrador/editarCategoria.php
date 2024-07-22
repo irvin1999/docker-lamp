@@ -63,7 +63,6 @@ $categorias = $consultaCategorias->fetchAll(PDO::FETCH_ASSOC);
     <div class="hero_area">
         <?php include 'menuadmin.php'; ?>
     </div>
-    <br />
     <div class="container-fluid row">
         <form action="categorias/editarCategoria.php" method="post" class="col-md-4 p-5 form-container">
             <h1 class="text-center p-3">Editar Categoría</h1>

@@ -17,7 +17,7 @@ if ($varsesion == null || $varsesion = '') {
 }
 
 // Obtener platos registrados
-include ('permisos/conexion.php');
+include('permisos/conexion.php');
 $query = $pdo->prepare("SELECT p.*, s.nombre AS sala, u.nombre, p.observacion 
 FROM pedidos p 
 INNER JOIN salas s ON p.id_sala = s.id 
@@ -78,6 +78,28 @@ if (isset($_POST['limpiar_tabla'])) {
     header("Location: historialventa.php");
     exit();
 }
+
+// Obtener los detalles del pedido si hay un id_pedido en la URL
+$pedido_detalle = [];
+$id_pedido = isset($_GET['id_pedido']) ? $_GET['id_pedido'] : null;
+
+if ($id_pedido && is_numeric($id_pedido)) {
+    // Obtener los detalles del pedido
+    $query = "SELECT detalle_pedidos.nombre, detalle_pedidos.cantidad, detalle_pedidos.precio 
+              FROM detalle_pedidos 
+              WHERE detalle_pedidos.id_pedido = :id_pedido";
+    $stmt = $pdo->prepare($query);
+    $stmt->bindParam(':id_pedido', $id_pedido, PDO::PARAM_INT);
+    $stmt->execute();
+    $pedido_detalle = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $subtotal = 0;
+    foreach ($pedido_detalle as $row) {
+        $subtotal += $row['cantidad'] * $row['precio'];
+    }
+    $iva = $subtotal * 0.13;
+    $total = $subtotal + $iva;
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -96,12 +118,10 @@ if (isset($_POST['limpiar_tabla'])) {
     <title>Historial-Venta</title>
 
     <!-- slider stylesheet -->
-    <link rel="stylesheet" type="text/css"
-        href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.1.3/assets/owl.carousel.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.1.3/assets/owl.carousel.min.css" />
 
     <!-- fonts style -->
-    <link href="https://fonts.googleapis.com/css?family=Poppins:400,700|Raleway:400,500,700&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Poppins:400,700|Raleway:400,500,700&display=swap" rel="stylesheet">
     <!-- bootstrap core css -->
     <link rel="stylesheet" type="text/css" href="../css2/bootstrap.css" />
     <link rel="stylesheet" type="text/css" href="../css2/footer.css" />
@@ -115,8 +135,7 @@ if (isset($_POST['limpiar_tabla'])) {
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
     <!-- CSS de Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shCk+0U0kLFIz1gWxlpeX2zc+5u90EZ2GJL2n" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shCk+0U0kLFIz1gWxlpeX2zc+5u90EZ2GJL2n" crossorigin="anonymous">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 
@@ -138,7 +157,7 @@ if (isset($_POST['limpiar_tabla'])) {
                     $alertType = $_SESSION['alert']['type'];
                     $alertMessage = $_SESSION['alert']['message'];
                     unset($_SESSION['alert']); // Limpiar la sesión para evitar que la alerta se muestre nuevamente
-                
+
                     echo "
                 <script src='https://cdn.jsdelivr.net/npm/sweetalert2@10'></script>
                 <script>
@@ -162,6 +181,7 @@ if (isset($_POST['limpiar_tabla'])) {
                                 <th scope="col">Usuario</th>
                                 <th scope="col">Observación</th>
                                 <th scope="col">Estado</th>
+                                <th scope="col">Factura</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -174,7 +194,7 @@ if (isset($_POST['limpiar_tabla'])) {
                                 } elseif ($row['estado'] == 'ELIMINADO') {
                                     $estado = '<span class="badge badge-danger">Eliminado</span>';
                                 }
-                                ?>
+                            ?>
                                 <tr>
                                     <td>
                                         <?php echo $row['sala']; ?>
@@ -197,6 +217,9 @@ if (isset($_POST['limpiar_tabla'])) {
                                     <td>
                                         <?php echo $estado; ?>
                                     </td>
+                                    <td>
+                                        <a href="historialventa.php?id_pedido=<?php echo $row['id']; ?>" class="btn btn-info">factura</a>
+                                    </td>
                                 </tr>
                             <?php } ?>
                         </tbody>
@@ -215,6 +238,62 @@ if (isset($_POST['limpiar_tabla'])) {
                 ?>
             </div>
         </div>
+        <!-- Sección de Factura -->
+        <?php if (isset($pedido_detalle)) { ?>
+            <div class="card mt-4">
+                <div class="card-header">
+                    Detalles de la Factura
+                </div>
+                <div class="card-body">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Cantidad</th>
+                                <th>Nombre del Plato</th>
+                                <th>Precio Unitario</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($pedido_detalle as $item) { ?>
+                                <tr>
+                                    <td><?php echo $item['cantidad']; ?></td>
+                                    <td><?php echo $item['nombre']; ?></td>
+                                    <td><?php echo number_format($item['precio'], 2); ?></td>
+                                    <td><?php echo number_format($item['cantidad'] * $item['precio'], 2); ?></td>
+                                </tr>
+                            <?php } ?>
+                        </tbody>
+                    </table>
+                    <hr>
+                    <div class="row">
+                        <div class="col-6">
+                            <h5>Subtotal</h5>
+                        </div>
+                        <div class="col-6 text-right">
+                            <h5><?php echo number_format($subtotal, 2); ?></h5>
+                        </div>
+                        <div class="col-6">
+                            <h5>IVA (13%)</h5>
+                        </div>
+                        <div class="col-6 text-right">
+                            <h5><?php echo number_format($iva, 2); ?></h5>
+                        </div>
+                        <div class="col-6">
+                            <h5>Total</h5>
+                        </div>
+                        <div class="col-6 text-right">
+                            <h5><?php echo number_format($total, 2); ?></h5>
+                        </div>
+                    </div>
+                    <form method="post" action="factura/procesar_factura.php">
+                        <input type="hidden" name="id_pedido" value="<?php echo $id_pedido; ?>">
+                        <button type="submit" class="btn btn-success btn-block">Cobrar</button>
+                    </form>
+                </div>
+            </div>
+        <?php } ?>
+    </div>
     </div>
     <script>
         // Función para verificar nuevos pedidos y actualizar la página si es necesario
@@ -222,7 +301,7 @@ if (isset($_POST['limpiar_tabla'])) {
             $.ajax({
                 url: 'verificarpedido.php',
                 type: 'GET',
-                success: function (data) {
+                success: function(data) {
                     // Comprobar si el total de pedidos ha cambiado
                     var totalPedidosActual = parseInt(data);
                     var totalPedidosAnterior = parseInt('<?php echo count($pedidos); ?>');

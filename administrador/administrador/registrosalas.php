@@ -85,7 +85,6 @@ $salas = $consultaSalas->fetchAll(PDO::FETCH_ASSOC);
     <div class="hero_area">
         <?php include 'menuadmin.php'; ?> <!-- Incluir el menú -->
     </div>
-    <br />
     <div class="container-fluid row">
         <form action="salas/crearSala.php" method="post" class="col-md-4 p-5 form-container">
             <h1 class="text-center p-3">Agregar Sala</h1>

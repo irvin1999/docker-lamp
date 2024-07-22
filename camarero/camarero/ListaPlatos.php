@@ -98,7 +98,7 @@ $platos = $consultaPlatos->fetchAll(PDO::FETCH_ASSOC);
                             <thead>
                                 <tr>
                                     <th scope="col">Nombre</th>
-                                    <th scope="col">Cateogira</th>
+                                    <th scope="col">Categoria</th>
                                     <th scope="col">Precio</th>
                                     <th scope="col">Imagen</th>
                                 </tr>
