@@ -25,6 +25,29 @@ INNER JOIN usuarios u ON p.id_usuario = u.id");
 $query->execute();
 $pedidos = $query->fetchAll(PDO::FETCH_ASSOC);
 
+$pedido_detalle = [];
+$id_pedido = isset($_GET['id_pedido']) ? $_GET['id_pedido'] : null;
+
+if ($id_pedido && is_numeric($id_pedido)) {
+    // Obtener los detalles del pedido
+    $query = "SELECT detalle_pedidos.nombre, detalle_pedidos.cantidad, detalle_pedidos.precio 
+              FROM detalle_pedidos 
+              WHERE detalle_pedidos.id_pedido = :id_pedido";
+    $stmt = $pdo->prepare($query);
+    $stmt->bindParam(':id_pedido', $id_pedido, PDO::PARAM_INT);
+    $stmt->execute();
+    $pedido_detalle = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $total = 0;
+    foreach ($pedido_detalle as $row) {
+        $total += $row['cantidad'] * $row['precio'];
+    }
+
+    // El total es el valor calculado a partir de los datos
+    // Calcular el IVA y el subtotal de forma que: subtotal + iva = total
+    $iva = $total * 0.13;
+    $subtotal = $total - $iva;
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -43,12 +66,10 @@ $pedidos = $query->fetchAll(PDO::FETCH_ASSOC);
     <title>Historial-Venta</title>
 
     <!-- slider stylesheet -->
-    <link rel="stylesheet" type="text/css"
-        href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.1.3/assets/owl.carousel.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.1.3/assets/owl.carousel.min.css" />
 
     <!-- fonts style -->
-    <link href="https://fonts.googleapis.com/css?family=Poppins:400,700|Raleway:400,500,700&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Poppins:400,700|Raleway:400,500,700&display=swap" rel="stylesheet">
     <!-- bootstrap core css -->
     <link rel="stylesheet" type="text/css" href="../css2/bootstrap.css" />
     <link rel="stylesheet" type="text/css" href="../css2/footer.css" />
@@ -62,8 +83,7 @@ $pedidos = $query->fetchAll(PDO::FETCH_ASSOC);
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
     <!-- CSS de Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shCk+0U0kLFIz1gWxlpeX2zc+5u90EZ2GJL2n" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shCk+0U0kLFIz1gWxlpeX2zc+5u90EZ2GJL2n" crossorigin="anonymous">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 
@@ -85,7 +105,7 @@ $pedidos = $query->fetchAll(PDO::FETCH_ASSOC);
                     $alertType = $_SESSION['alert']['type'];
                     $alertMessage = $_SESSION['alert']['message'];
                     unset($_SESSION['alert']); // Limpiar la sesión para evitar que la alerta se muestre nuevamente
-                
+
                     echo "
                 <script src='https://cdn.jsdelivr.net/npm/sweetalert2@10'></script>
                 <script>
@@ -109,6 +129,7 @@ $pedidos = $query->fetchAll(PDO::FETCH_ASSOC);
                                 <th scope="col">Usuario</th>
                                 <th scope="col">Observación</th>
                                 <th scope="col">Estado</th>
+                                <th scope="col">Factura</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -120,8 +141,10 @@ $pedidos = $query->fetchAll(PDO::FETCH_ASSOC);
                                     $estado = '<span class="badge badge-success">Completado</span>';
                                 } elseif ($row['estado'] == 'ELIMINADO') {
                                     $estado = '<span class="badge badge-danger">Eliminado</span>';
+                                } elseif ($row['estado'] == 'COBRADO') { // Añadir esto
+                                    $estado = '<span class="badge badge-primary">Cobrado</span>';
                                 }
-                                ?>
+                            ?>
                                 <tr>
                                     <td>
                                         <?php echo $row['sala']; ?>
@@ -144,21 +167,106 @@ $pedidos = $query->fetchAll(PDO::FETCH_ASSOC);
                                     <td>
                                         <?php echo $estado; ?>
                                     </td>
+                                    <td>
+                                        <a href="historialventa.php?id_pedido=<?php echo $row['id']; ?>" class="btn btn-info btn-factura">factura</a>
+                                    </td>
                                 </tr>
                             <?php } ?>
                         </tbody>
                     </table>
                 </div>
+                <?php
+                // Verificar si el usuario es administrador o administrador predeterminado
+                if ($_SESSION['rol'] == 'administrador' || ($_SESSION['rol'] == 'administrador' && $_SESSION['es_admin_predeterminado'])) {
+                    // Si el usuario es administrador o administrador predeterminado, mostrar el botón
+                    echo '<form method="post">
+                                <button id="limpiar-tabla-btn" name="limpiar_tabla" class="btn btn-danger">
+                            <i class="bi bi-trash"></i> Limpiar Tabla
+                                </button>
+                          </form>';
+                }
+                ?>
             </div>
         </div>
+        <!-- Sección de Factura -->
+        <?php if (isset($pedido_detalle)) { ?>
+            <div class="card mt-4">
+                <div class="card-header">
+                    Detalles de la Factura
+                </div>
+                <div class="card-body">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Cantidad</th>
+                                <th>Nombre del Plato</th>
+                                <th>Precio Unitario</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($pedido_detalle as $item) { ?>
+                                <tr>
+                                    <td><?php echo $item['cantidad']; ?></td>
+                                    <td><?php echo $item['nombre']; ?></td>
+                                    <td><?php echo number_format($item['precio'], 2); ?></td>
+                                    <td><?php echo number_format($item['cantidad'] * $item['precio'], 2); ?></td>
+                                </tr>
+                            <?php } ?>
+                        </tbody>
+                    </table>
+                    <hr>
+                    <div class="row">
+                        <div class="col-6">
+                            <h5>Subtotal</h5>
+                        </div>
+                        <div class="col-6 text-right">
+                            <h5><?php echo number_format($subtotal, 2); ?></h5>
+                        </div>
+                        <div class="col-6">
+                            <h5>IVA (13%)</h5>
+                        </div>
+                        <div class="col-6 text-right">
+                            <h5><?php echo number_format($iva, 2); ?></h5>
+                        </div>
+                        <div class="col-6">
+                            <h5>Total</h5>
+                        </div>
+                        <div class="col-6 text-right">
+                            <h5><?php echo number_format($total, 2); ?></h5>
+                        </div>
+                    </div>
+                    <form method="post" action="factura/procesar_factura.php">
+                        <input type="hidden" name="id_pedido" value="<?php echo $id_pedido; ?>">
+                        <button type="submit" class="btn btn-success btn-block">Cobrar</button>
+                    </form>
+                </div>
+            </div>
+        <?php } ?>
     </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $(".btn-factura").click(function() {
+                // Obtener el ID del pedido desde el atributo data-id del botón
+                var id = $(this).data('id');
+
+                // Ocultar todas las secciones de factura
+                $(".factura").hide();
+
+                // Mostrar la sección de factura correspondiente
+                $("#factura-" + id).toggle();
+            });
+        });
+    </script>
+
     <script>
         // Función para verificar nuevos pedidos y actualizar la página si es necesario
         function verificarNuevosPedidos() {
             $.ajax({
                 url: 'verificarpedido.php',
                 type: 'GET',
-                success: function (data) {
+                success: function(data) {
                     // Comprobar si el total de pedidos ha cambiado
                     var totalPedidosActual = parseInt(data);
                     var totalPedidosAnterior = parseInt('<?php echo count($pedidos); ?>');

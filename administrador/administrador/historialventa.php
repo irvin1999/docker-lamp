@@ -26,7 +26,6 @@ $query->execute();
 $pedidos = $query->fetchAll(PDO::FETCH_ASSOC);
 
 
-// Función para limpiar la tabla de pedidos
 function limpiarTablaPedidos($pdo)
 {
     // Comenzar una transacción
@@ -34,22 +33,32 @@ function limpiarTablaPedidos($pdo)
 
     try {
         // Verificar si hay pedidos pendientes
-        $query = $pdo->prepare("SELECT COUNT(*) AS count FROM pedidos WHERE estado = 'PENDIENTE'");
+        $query = $pdo->prepare("
+            SELECT COUNT(*) AS count
+            FROM pedidos
+            WHERE estado IN ('COMPLETADO', 'PENDIENTE')
+        ");
         $query->execute();
         $result = $query->fetch(PDO::FETCH_ASSOC);
 
         if ($result['count'] > 0) {
             // Si hay pedidos pendientes, mostrar un aviso y salir de la función
-            $_SESSION['alert'] = array('type' => 'error', 'message' => 'No se puede limpiar la tabla porque hay pedidos pendientes.');
+            $_SESSION['alert'] = array('type' => 'error', 'message' => 'No se puede limpiar la tabla deben estar en estado de COBRO o ELIMINADO.');
+            $pdo->rollBack();
             return false;
         }
 
-        // No hay pedidos pendientes, proceder con la limpieza
+        // Eliminar los registros en facturas relacionados con los pedidos
+        $query = $pdo->prepare("DELETE FROM facturas WHERE id_pedido IN (SELECT id FROM pedidos)");
+        $query->execute();
+
         // Eliminar registros de la tabla detalle_pedidos
-        $pdo->exec("DELETE FROM detalle_pedidos WHERE id_pedido IN (SELECT id FROM pedidos)");
+        $query = $pdo->prepare("DELETE FROM detalle_pedidos WHERE id_pedido IN (SELECT id FROM pedidos)");
+        $query->execute();
 
         // Eliminar registros de la tabla de pedidos
-        $pdo->exec("DELETE FROM pedidos");
+        $query = $pdo->prepare("DELETE FROM pedidos");
+        $query->execute();
 
         // Confirmar la transacción
         $pdo->commit();
@@ -62,10 +71,12 @@ function limpiarTablaPedidos($pdo)
         $pdo->rollBack();
 
         // Mostrar un mensaje de error
-        $_SESSION['alert'] = array('type' => 'error', 'message' => 'Error al limpiar la tabla de pedidos.');
+        $_SESSION['alert'] = array('type' => 'error', 'message' => 'Error al limpiar la tabla de pedidos: ' . $e->getMessage());
         return false; // Error
     }
 }
+
+
 
 // Variable para almacenar el mensaje
 $mensaje = '';
@@ -223,7 +234,8 @@ if ($id_pedido && is_numeric($id_pedido)) {
                                         <?php echo $estado; ?>
                                     </td>
                                     <td>
-                                        <a href="historialventa.php?id_pedido=<?php echo $row['id']; ?>" class="btn btn-info btn-factura">factura</a>
+                                    <a href="historialventa.php?id_pedido=<?php echo $row['id']; ?>" class="btn btn-info btn-factura" data-id="<?php echo $row['id']; ?>">Factura</a>
+
                                     </td>
                                 </tr>
                             <?php } ?>

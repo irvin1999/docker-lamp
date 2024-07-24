@@ -65,8 +65,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmt->bindParam(':total', $total, PDO::PARAM_STR);
     $stmt->execute();
 
-    // Redirigir a ticket.php con parámetros
-    header("Location: ../RECEIPT-main/ticket.php?id_pedido=$id_pedido&total=$total");
+    $_SESSION['alert'] = [
+        'type' => 'success',
+        'message' => 'Pedido cobrado con éxito.'
+    ];
+
+    header("Location: ../historialventa.php");
     exit();
 }
 ?>
