@@ -79,7 +79,6 @@ if (isset($_POST['limpiar_tabla'])) {
     exit();
 }
 
-// Obtener los detalles del pedido si hay un id_pedido en la URL
 $pedido_detalle = [];
 $id_pedido = isset($_GET['id_pedido']) ? $_GET['id_pedido'] : null;
 
@@ -93,14 +92,18 @@ if ($id_pedido && is_numeric($id_pedido)) {
     $stmt->execute();
     $pedido_detalle = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    $subtotal = 0;
+    $total = 0;
     foreach ($pedido_detalle as $row) {
-        $subtotal += $row['cantidad'] * $row['precio'];
+        $total += $row['cantidad'] * $row['precio'];
     }
-    $iva = $subtotal * 0.13;
-    $total = $subtotal + $iva;
+
+    // El total es el valor calculado a partir de los datos
+    // Calcular el IVA y el subtotal de forma que: subtotal + iva = total
+    $iva = $total * 0.13;
+    $subtotal = $total - $iva;
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="es">
 
@@ -193,6 +196,8 @@ if ($id_pedido && is_numeric($id_pedido)) {
                                     $estado = '<span class="badge badge-success">Completado</span>';
                                 } elseif ($row['estado'] == 'ELIMINADO') {
                                     $estado = '<span class="badge badge-danger">Eliminado</span>';
+                                } elseif ($row['estado'] == 'COBRADO') { // Añadir esto
+                                    $estado = '<span class="badge badge-primary">Cobrado</span>';
                                 }
                             ?>
                                 <tr>
@@ -218,7 +223,7 @@ if ($id_pedido && is_numeric($id_pedido)) {
                                         <?php echo $estado; ?>
                                     </td>
                                     <td>
-                                        <a href="historialventa.php?id_pedido=<?php echo $row['id']; ?>" class="btn btn-info">factura</a>
+                                        <a href="historialventa.php?id_pedido=<?php echo $row['id']; ?>" class="btn btn-info btn-factura">factura</a>
                                     </td>
                                 </tr>
                             <?php } ?>
@@ -294,7 +299,22 @@ if ($id_pedido && is_numeric($id_pedido)) {
             </div>
         <?php } ?>
     </div>
-    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $(".btn-factura").click(function() {
+                // Obtener el ID del pedido desde el atributo data-id del botón
+                var id = $(this).data('id');
+
+                // Ocultar todas las secciones de factura
+                $(".factura").hide();
+
+                // Mostrar la sección de factura correspondiente
+                $("#factura-" + id).toggle();
+            });
+        });
+    </script>
+
     <script>
         // Función para verificar nuevos pedidos y actualizar la página si es necesario
         function verificarNuevosPedidos() {
