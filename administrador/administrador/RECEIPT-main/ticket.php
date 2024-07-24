@@ -86,10 +86,11 @@ $pdf->Ln(3);
 
 $total_subtotal = 0;
 
+// Iterar sobre los productos y calcular el total subtotal
 foreach ($productos as $producto) {
     $total_producto = $producto['precio_producto'] * $producto['cantidad'];
     $total_subtotal += $total_producto;
-    
+
     $pdf->MultiCell(0, 4, iconv("UTF-8", "ISO-8859-1", $producto['nombre_producto']), 0, 'C', false);
     $pdf->Cell(10, 4, iconv("UTF-8", "ISO-8859-1", $producto['cantidad']), 0, 0, 'C');
     $pdf->Cell(19, 4, iconv("UTF-8", "ISO-8859-1", "$" . number_format($producto['precio_producto'], 2) . " USD"), 0, 0, 'C');
@@ -102,18 +103,15 @@ foreach ($productos as $producto) {
 $pdf->Cell(72, 5, iconv("UTF-8", "ISO-8859-1", "-------------------------------------------------------------------"), 0, 0, 'C');
 $pdf->Ln(5);
 
-$iva = $total_subtotal * 0.13;
-$total_a_pagar = $total_subtotal + $iva;
-
 $pdf->Cell(18, 5, iconv("UTF-8", "ISO-8859-1", ""), 0, 0, 'C');
 $pdf->Cell(22, 5, iconv("UTF-8", "ISO-8859-1", "SUBTOTAL"), 0, 0, 'C');
-$pdf->Cell(32, 5, iconv("UTF-8", "ISO-8859-1", "$" . number_format($total_subtotal, 2) . " USD"), 0, 0, 'C');
+$pdf->Cell(32, 5, iconv("UTF-8", "ISO-8859-1", "+ $" . number_format($total_subtotal, 2) . " USD"), 0, 0, 'C');
 
 $pdf->Ln(5);
 
 $pdf->Cell(18, 5, iconv("UTF-8", "ISO-8859-1", ""), 0, 0, 'C');
 $pdf->Cell(22, 5, iconv("UTF-8", "ISO-8859-1", "IVA (13%)"), 0, 0, 'C');
-$pdf->Cell(32, 5, iconv("UTF-8", "ISO-8859-1", "$" . number_format($iva, 2) . " USD"), 0, 0, 'C');
+$pdf->Cell(32, 5, iconv("UTF-8", "ISO-8859-1", "+ $" . number_format($total_subtotal * 0.13, 2) . " USD"), 0, 0, 'C');
 
 $pdf->Ln(5);
 
@@ -122,11 +120,10 @@ $pdf->Ln(5);
 
 $pdf->Cell(18, 5, iconv("UTF-8", "ISO-8859-1", ""), 0, 0, 'C');
 $pdf->Cell(22, 5, iconv("UTF-8", "ISO-8859-1", "TOTAL A PAGAR"), 0, 0, 'C');
-$pdf->Cell(32, 5, iconv("UTF-8", "ISO-8859-1", "$" . number_format($total_a_pagar, 2) . " USD"), 0, 0, 'C');
+$pdf->Cell(32, 5, iconv("UTF-8", "ISO-8859-1", "$" . number_format($total, 2) . " USD"), 0, 0, 'C');
 
 $pdf->Ln(10);
 $pdf->Cell(0, 10, iconv("UTF-8", "ISO-8859-1", "Gracias por su compra"), 0, 0, 'C');
 
 // Cerrar y mostrar el PDF
 $pdf->Output();
-?>
