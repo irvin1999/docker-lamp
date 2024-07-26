@@ -17,37 +17,13 @@ if ($varsesion == null || $varsesion = '') {
 }
 
 // Obtener platos registrados
-include ('permisos/conexion.php');
+include('permisos/conexion.php');
 $query = $pdo->prepare("SELECT p.*, s.nombre AS sala, u.nombre, p.observacion 
 FROM pedidos p 
 INNER JOIN salas s ON p.id_sala = s.id 
 INNER JOIN usuarios u ON p.id_usuario = u.id");
 $query->execute();
 $pedidos = $query->fetchAll(PDO::FETCH_ASSOC);
-
-$pedido_detalle = [];
-$id_pedido = isset($_GET['id_pedido']) ? $_GET['id_pedido'] : null;
-
-if ($id_pedido && is_numeric($id_pedido)) {
-    // Obtener los detalles del pedido
-    $query = "SELECT detalle_pedidos.nombre, detalle_pedidos.cantidad, detalle_pedidos.precio 
-              FROM detalle_pedidos 
-              WHERE detalle_pedidos.id_pedido = :id_pedido";
-    $stmt = $pdo->prepare($query);
-    $stmt->bindParam(':id_pedido', $id_pedido, PDO::PARAM_INT);
-    $stmt->execute();
-    $pedido_detalle = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    $total = 0;
-    foreach ($pedido_detalle as $row) {
-        $total += $row['cantidad'] * $row['precio'];
-    }
-
-    // El total es el valor calculado a partir de los datos
-    // Calcular el IVA y el subtotal de forma que: subtotal + iva = total
-    $iva = $total * 0.13;
-    $subtotal = $total - $iva;
-}
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -87,6 +63,26 @@ if ($id_pedido && is_numeric($id_pedido)) {
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Tu CSS personalizado -->
+    <style>
+        /* Añadir al CSS de tu proyecto */
+        .hero_area {
+            position: relative;
+            z-index: 10;
+            /* Ajusta este valor según tus necesidades */
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            /* Asegúrate de que este valor sea menor que el del menú */
+        }
+    </style>
 </head>
 
 <body class="sub_page">
@@ -107,15 +103,15 @@ if ($id_pedido && is_numeric($id_pedido)) {
                     unset($_SESSION['alert']); // Limpiar la sesión para evitar que la alerta se muestre nuevamente
 
                     echo "
-                <script src='https://cdn.jsdelivr.net/npm/sweetalert2@10'></script>
-                <script>
-                    Swal.fire({
-                        icon: '{$alertType}',
-                        title: '{$alertMessage}',
-                        showConfirmButton: false,
-                        timer: 1500
-                    });
-                </script>";
+        <script src='https://cdn.jsdelivr.net/npm/sweetalert2@10'></script>
+        <script>
+            Swal.fire({
+                icon: '{$alertType}',
+                title: '{$alertMessage}',
+                showConfirmButton: false,
+                timer: 1500
+            });
+        </script>";
                 }
                 ?>
                 <div class="table-responsive">
@@ -135,41 +131,28 @@ if ($id_pedido && is_numeric($id_pedido)) {
                         <tbody>
                             <?php foreach ($pedidos as $row) {
                                 $estado = "";
+                                $accion = ""; // Nueva variable para la acción
                                 if ($row['estado'] == 'PENDIENTE') {
                                     $estado = '<a href="mesas.php?id_sala=' . $row['id_sala'] . '&mesa=' . $row['num_mesa'] . '" class="btn btn-link"><span class="badge badge-warning">Pendiente</span></a>';
                                 } elseif ($row['estado'] == 'COMPLETADO') {
                                     $estado = '<span class="badge badge-success">Completado</span>';
+                                    $accion = '<a href="#" class="btn btn-info btn-factura2" data-id="' . $row['id'] . '"><i class="bi bi-file-earmark-text"></i></a>'; // Ícono de documento
                                 } elseif ($row['estado'] == 'ELIMINADO') {
                                     $estado = '<span class="badge badge-danger">Eliminado</span>';
                                 } elseif ($row['estado'] == 'COBRADO') { // Añadir esto
                                     $estado = '<span class="badge badge-primary">Cobrado</span>';
+                                    $accion = '<a href="#" class="btn btn-light btn-factura" data-id="' . $row['id'] . '" data-toggle="modal" data-target="#pdfModal"><i class="bi bi-eye"></i></a>'; // Ícono de ojo
                                 }
                             ?>
                                 <tr>
-                                    <td>
-                                        <?php echo $row['sala']; ?>
-                                    </td>
-                                    <td>
-                                        <?php echo $row['num_mesa']; ?>
-                                    </td>
-                                    <td>
-                                        <?php echo $row['fecha']; ?>
-                                    </td>
-                                    <td>
-                                        <?php echo $row['total']; ?>
-                                    </td>
-                                    <td>
-                                        <?php echo $row['nombre']; ?>
-                                    </td>
-                                    <td style="max-width: 200px; overflow-wrap: break-word;">
-                                        <?php echo $row['observacion']; ?>
-                                    </td>
-                                    <td>
-                                        <?php echo $estado; ?>
-                                    </td>
-                                    <td>
-                                        <a href="historialventa.php?id_pedido=<?php echo $row['id']; ?>" class="btn btn-info btn-factura">factura</a>
-                                    </td>
+                                    <td><?php echo $row['sala']; ?></td>
+                                    <td><?php echo $row['num_mesa']; ?></td>
+                                    <td><?php echo $row['fecha']; ?></td>
+                                    <td><?php echo $row['total']; ?></td>
+                                    <td><?php echo $row['nombre']; ?></td>
+                                    <td style="max-width: 200px; overflow-wrap: break-word;"><?php echo $row['observacion']; ?></td>
+                                    <td><?php echo $estado; ?></td>
+                                    <td><?php echo $accion; ?></td>
                                 </tr>
                             <?php } ?>
                         </tbody>
@@ -180,109 +163,87 @@ if ($id_pedido && is_numeric($id_pedido)) {
                 if ($_SESSION['rol'] == 'administrador' || ($_SESSION['rol'] == 'administrador' && $_SESSION['es_admin_predeterminado'])) {
                     // Si el usuario es administrador o administrador predeterminado, mostrar el botón
                     echo '<form method="post">
-                                <button id="limpiar-tabla-btn" name="limpiar_tabla" class="btn btn-danger">
-                            <i class="bi bi-trash"></i> Limpiar Tabla
-                                </button>
-                          </form>';
+                    <button id="limpiar-tabla-btn" name="limpiar_tabla" class="btn btn-danger">
+                <i class="bi bi-trash"></i> Limpiar Tabla
+                    </button>
+              </form>';
                 }
                 ?>
             </div>
         </div>
-        <!-- Sección de Factura -->
-        <?php if (isset($pedido_detalle)) { ?>
-            <div class="card mt-4">
-                <div class="card-header">
-                    Detalles de la Factura
+    </div>
+    <!-- Modal de Detalles de Factura -->
+    <div class="modal fade" id="facturaModal" tabindex="-1" aria-labelledby="facturaModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="facturaModalLabel">Detalles de la Factura</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="card-body">
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Cantidad</th>
-                                <th>Nombre del Plato</th>
-                                <th>Precio Unitario</th>
-                                <th>Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($pedido_detalle as $item) { ?>
-                                <tr>
-                                    <td><?php echo $item['cantidad']; ?></td>
-                                    <td><?php echo $item['nombre']; ?></td>
-                                    <td><?php echo number_format($item['precio'], 2); ?></td>
-                                    <td><?php echo number_format($item['cantidad'] * $item['precio'], 2); ?></td>
-                                </tr>
-                            <?php } ?>
-                        </tbody>
-                    </table>
-                    <hr>
-                    <div class="row">
-                        <div class="col-6">
-                            <h5>Subtotal</h5>
-                        </div>
-                        <div class="col-6 text-right">
-                            <h5><?php echo number_format($subtotal, 2); ?></h5>
-                        </div>
-                        <div class="col-6">
-                            <h5>IVA (13%)</h5>
-                        </div>
-                        <div class="col-6 text-right">
-                            <h5><?php echo number_format($iva, 2); ?></h5>
-                        </div>
-                        <div class="col-6">
-                            <h5>Total</h5>
-                        </div>
-                        <div class="col-6 text-right">
-                            <h5><?php echo number_format($total, 2); ?></h5>
-                        </div>
+                <div class="modal-body">
+                    <!-- Sección de Factura -->
+                    <div id="facturaDetalles">
+                        <!-- El contenido de esta sección será reemplazado por JavaScript -->
                     </div>
-                    <form method="post" action="factura/procesar_factura.php">
-                        <input type="hidden" name="id_pedido" value="<?php echo $id_pedido; ?>">
-                        <button type="submit" class="btn btn-success btn-block">Cobrar</button>
-                    </form>
                 </div>
             </div>
-        <?php } ?>
+        </div>
+    </div>
+
+    <!-- Modal de PDF -->
+    <div class="modal fade" id="pdfModal" tabindex="-1" aria-labelledby="pdfModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="pdfModalLabel">Ver PDF de la Factura</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Mostrar el PDF en un iframe -->
+                    <iframe id="pdfFrame" src="" style="width: 100%; height: 500px;" frameborder="0"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
     </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script>
         $(document).ready(function() {
-            $(".btn-factura").click(function() {
-                // Obtener el ID del pedido desde el atributo data-id del botón
-                var id = $(this).data('id');
+            // Cargar detalles de la factura en el modal de detalles
+            $('.btn-factura2').on('click', function() {
+                var idPedido = $(this).data('id');
+                $.ajax({
+                    url: 'factura/factura_detalle.php',
+                    type: 'GET',
+                    data: {
+                        id_pedido: idPedido
+                    },
+                    success: function(response) {
+                        $('#facturaDetalles').html(response);
+                        var myModal = new bootstrap.Modal(document.getElementById('facturaModal'));
+                        myModal.show();
+                    },
+                    error: function() {
+                        $('#facturaDetalles').html('<p>Error al cargar los detalles de la factura.</p>');
+                    }
+                });
+            });
 
-                // Ocultar todas las secciones de factura
-                $(".factura").hide();
-
-                // Mostrar la sección de factura correspondiente
-                $("#factura-" + id).toggle();
+            // Mostrar el PDF en el modal de PDF
+            $('.btn-factura').on('click', function() {
+                var idPedido = $(this).data('id');
+                var pdfUrl = 'RECEIPT-main/factura.php?id_pedido=' + idPedido;
+                document.getElementById('pdfFrame').src = pdfUrl;
+                var myModal = new bootstrap.Modal(document.getElementById('pdfModal'));
+                myModal.show();
             });
         });
     </script>
-
-    <script>
-        // Función para verificar nuevos pedidos y actualizar la página si es necesario
-        function verificarNuevosPedidos() {
-            $.ajax({
-                url: 'verificarpedido.php',
-                type: 'GET',
-                success: function(data) {
-                    // Comprobar si el total de pedidos ha cambiado
-                    var totalPedidosActual = parseInt(data);
-                    var totalPedidosAnterior = parseInt('<?php echo count($pedidos); ?>');
-                    if (totalPedidosActual !== totalPedidosAnterior) {
-                        // Si hay nuevos pedidos, recargar la página
-                        location.reload();
-                    }
-                }
-            });
-        }
-
-        // Llamar a la función para verificar nuevos pedidos cada cierto tiempo
-        setInterval(verificarNuevosPedidos, 5000); // Intervalo de 5 segundos (ajustable según sea necesario)
-    </script>
     <script type="text/javascript" src="../js2/jquery-3.4.1.min.js"></script>
     <script type="text/javascript" src="../js2/bootstrap.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <!-- Bootstrap JS Bundle (incluye Popper) -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
     </br>
     <?php include '../footer/footer.php'; ?>
 </body>

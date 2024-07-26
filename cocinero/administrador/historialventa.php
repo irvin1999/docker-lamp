@@ -119,6 +119,8 @@ $pedidos = $query->fetchAll(PDO::FETCH_ASSOC);
                                     $estado = '<span class="badge badge-success">Completado</span>';
                                 } elseif ($row['estado'] == 'ELIMINADO') {
                                     $estado = '<span class="badge badge-danger">Eliminado</span>';
+                                } elseif ($row['estado'] == 'COBRADO') {
+                                    $estado = '<span class="badge badge-primary">Cobrado</span>';
                                 }
                                 ?>
                                 <tr>

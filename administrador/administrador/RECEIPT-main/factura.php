@@ -2,15 +2,14 @@
 require "./code128.php";
 require '../permisos/conexion.php'; // Conexión a la base de datos
 
-// Asegúrate de que se reciban los parámetros
-if (!isset($_GET['id_pedido']) || !isset($_GET['total'])) {
-    die('Faltan parámetros');
+// Asegúrate de que se reciba el parámetro id_pedido
+if (!isset($_GET['id_pedido'])) {
+    die('Falta el parámetro id_pedido');
 }
 
 $id_pedido = $_GET['id_pedido'];
-$total = $_GET['total'];
 
-// Consultar detalles del pedido para el ticket
+// Consultar detalles del pedido para la factura
 $query = "SELECT
             p.num_mesa,
             p.fecha AS fecha_pedido,
@@ -32,18 +31,21 @@ $query = "SELECT
           JOIN
             usuarios u ON p.id_usuario = u.id
           WHERE
-            p.id = :id_pedido";
+            p.id = :id_pedido AND p.estado = 'COBRADO'";
 $stmt = $pdo->prepare($query);
 $stmt->bindParam(':id_pedido', $id_pedido, PDO::PARAM_INT);
 $stmt->execute();
 $productos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Obtener el nombre del cajero (usuario)
-$cajero = "";
-if (!empty($productos)) {
-    $cajero = $productos[0]['usuario_nombre'];
+// Verificar si se encontraron productos
+if (empty($productos)) {
+    die('No se encontró ninguna factura con el estado COBRADO para este pedido.');
 }
 
+// Obtener el nombre del cajero (usuario)
+$cajero = $productos[0]['usuario_nombre'];
+
+// Crear el PDF
 $pdf = new PDF_Code128('P', 'mm', array(80, 258));
 $pdf->SetMargins(4, 10, 4);
 $pdf->AddPage();

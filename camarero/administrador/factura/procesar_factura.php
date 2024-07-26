@@ -15,16 +15,40 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     $id_pedido = $_POST['id_pedido'];
 
-    // Obtener el estado del pedido para verificar si se puede cobrar
-    $query = "SELECT estado, SUM(precio * cantidad) as total FROM detalle_pedidos 
-              JOIN pedidos ON detalle_pedidos.id_pedido = pedidos.id 
+    // Obtener los detalles del pedido para calcular el total
+    $query = "SELECT detalle_pedidos.nombre, detalle_pedidos.cantidad, detalle_pedidos.precio 
+              FROM detalle_pedidos 
               WHERE detalle_pedidos.id_pedido = :id_pedido";
+    $stmt = $pdo->prepare($query);
+    $stmt->bindParam(':id_pedido', $id_pedido, PDO::PARAM_INT);
+    $stmt->execute();
+    $pedido_detalle = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    if (!$pedido_detalle) {
+        $_SESSION['alert'] = [
+            'type' => 'error',
+            'message' => 'No se pudo encontrar el pedido.'
+        ];
+        header("Location: ../historialventa.php");
+        exit();
+    }
+
+    $total = 0;
+    foreach ($pedido_detalle as $row) {
+        $total += $row['cantidad'] * $row['precio'];
+    }
+
+    // Calcular el IVA y el subtotal
+    $iva = $total * 0.13;
+    $subtotal = $total - $iva;
+
+    // Verificar si el pedido está en un estado que permite el cobro
+    $query = "SELECT estado FROM pedidos WHERE id = :id_pedido";
     $stmt = $pdo->prepare($query);
     $stmt->bindParam(':id_pedido', $id_pedido, PDO::PARAM_INT);
     $stmt->execute();
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    // Verificar si se encontró un resultado
     if ($result === false || $result === null) {
         $_SESSION['alert'] = [
             'type' => 'error',
@@ -35,9 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     $estado_pedido = $result['estado'];
-    $subtotal = $result['total'];
 
-    // Verificar si el pedido está en un estado que permite el cobro
     if ($estado_pedido !== 'COMPLETADO') {
         $_SESSION['alert'] = [
             'type' => 'error',
@@ -46,10 +68,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         header("Location: ../historialventa.php");
         exit();
     }
-
-    // Calcular IVA y total
-    $iva = $subtotal * 0.13;
-    $total = $subtotal + $iva;
 
     // Procesar el cobro y actualizar el estado del pedido a 'COBRADO'
     $query = "UPDATE pedidos SET estado = 'COBRADO' WHERE id = :id_pedido";
@@ -65,12 +83,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmt->bindParam(':total', $total, PDO::PARAM_STR);
     $stmt->execute();
 
-    $_SESSION['alert'] = [
-        'type' => 'success',
-        'message' => 'Pedido cobrado con éxito.'
-    ];
-
-    header("Location: ../historialventa.php");
+    // Redirigir a ticket.php con parámetros
+    header("Location: ../RECEIPT-main/ticket.php?id_pedido=$id_pedido&total=$total");
     exit();
 }
 ?>
