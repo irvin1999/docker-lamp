@@ -42,7 +42,7 @@ CREATE TABLE `asistencia` (
 
 LOCK TABLES `asistencia` WRITE;
 /*!40000 ALTER TABLE `asistencia` DISABLE KEYS */;
-INSERT INTO `asistencia` VALUES (1,'2024-07-16 11:17:18','2024-07-16 11:47:04','2024-07-16',2);
+INSERT INTO `asistencia` VALUES (1,'2024-07-26 13:56:08','2024-07-26 13:56:12','2024-07-26',1);
 /*!40000 ALTER TABLE `asistencia` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -90,7 +90,7 @@ CREATE TABLE `categorias` (
 
 LOCK TABLES `categorias` WRITE;
 /*!40000 ALTER TABLE `categorias` DISABLE KEYS */;
-INSERT INTO `categorias` VALUES (1,'Entrantes'),(2,'Principales'),(3,'Bebidas'),(4,'menu del dia');
+INSERT INTO `categorias` VALUES (1,'Entrante'),(2,'segundo'),(3,'menu del dia'),(4,'Bebidas');
 /*!40000 ALTER TABLE `categorias` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -110,7 +110,7 @@ CREATE TABLE `detalle_pedidos` (
   PRIMARY KEY (`id`),
   KEY `id_pedido` (`id_pedido`),
   CONSTRAINT `detalle_pedidos_ibfk_1` FOREIGN KEY (`id_pedido`) REFERENCES `pedidos` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -119,8 +119,37 @@ CREATE TABLE `detalle_pedidos` (
 
 LOCK TABLES `detalle_pedidos` WRITE;
 /*!40000 ALTER TABLE `detalle_pedidos` DISABLE KEYS */;
-INSERT INTO `detalle_pedidos` VALUES (1,'causa rellena',12.00,1,4),(2,'causa rellena',12.00,1,5),(3,'causa rellena',12.00,1,6),(4,'causa rellena',12.00,1,7),(5,'causa rellena',12.00,1,8),(6,'cebiche',12.00,2,9);
 /*!40000 ALTER TABLE `detalle_pedidos` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `facturas`
+--
+
+DROP TABLE IF EXISTS `facturas`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `facturas` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id_pedido` int(11) NOT NULL,
+  `id_usuario` int(11) NOT NULL,
+  `fecha` timestamp NOT NULL DEFAULT current_timestamp(),
+  `total` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fk_facturas_pedido` (`id_pedido`),
+  KEY `fk_facturas_usuario` (`id_usuario`),
+  CONSTRAINT `fk_facturas_pedido` FOREIGN KEY (`id_pedido`) REFERENCES `pedidos` (`id`),
+  CONSTRAINT `fk_facturas_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `facturas`
+--
+
+LOCK TABLES `facturas` WRITE;
+/*!40000 ALTER TABLE `facturas` DISABLE KEYS */;
+/*!40000 ALTER TABLE `facturas` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -144,7 +173,7 @@ CREATE TABLE `pedidos` (
   KEY `fk_pedidos_usuarios` (`id_usuario`),
   CONSTRAINT `fk_pedidos_usuarios` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id`),
   CONSTRAINT `pedidos_ibfk_1` FOREIGN KEY (`id_sala`) REFERENCES `salas` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -153,7 +182,6 @@ CREATE TABLE `pedidos` (
 
 LOCK TABLES `pedidos` WRITE;
 /*!40000 ALTER TABLE `pedidos` DISABLE KEYS */;
-INSERT INTO `pedidos` VALUES (4,1,1,'2024-07-16 09:45:47',12.00,'','ELIMINADO',1),(5,1,2,'2024-07-16 09:45:55',12.00,'','COMPLETADO',1),(6,1,1,'2024-07-17 09:02:55',12.00,'','ELIMINADO',1),(7,1,2,'2024-07-17 10:47:04',12.00,'','COMPLETADO',1),(8,1,1,'2024-07-17 10:46:51',12.00,'','PENDIENTE',1),(9,1,2,'2024-07-17 10:47:23',24.00,'','ELIMINADO',1);
 /*!40000 ALTER TABLE `pedidos` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
@@ -202,7 +230,7 @@ CREATE TABLE `platos` (
   PRIMARY KEY (`id`),
   KEY `id_categoria` (`id_categoria`),
   CONSTRAINT `fk_platos_categoria` FOREIGN KEY (`id_categoria`) REFERENCES `categorias` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -211,7 +239,7 @@ CREATE TABLE `platos` (
 
 LOCK TABLES `platos` WRITE;
 /*!40000 ALTER TABLE `platos` DISABLE KEYS */;
-INSERT INTO `platos` VALUES (5,'causa rellena',12.00,'../../images/20240717110148.jpg',NULL,1,1),(6,'cebiche',12.00,'../../images/20240717110202.jpg',NULL,1,2),(7,'tamales',13.00,'../../images/20240717124945.jpg',NULL,1,4);
+INSERT INTO `platos` VALUES (1,'cebiche',12.00,'../../images/20240726134927.jpg',NULL,1,1),(2,'causa rellena',8.50,'../../images/20240726135110.jpg',NULL,1,1),(3,'lomo saltado',14.49,'../../images/20240726135139.jpg',NULL,1,2),(4,'coca cola',2.50,'../../images/20240726135459.jpg',NULL,1,4);
 /*!40000 ALTER TABLE `platos` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -228,7 +256,7 @@ CREATE TABLE `salas` (
   `mesas` int(11) NOT NULL,
   `estado` int(11) NOT NULL DEFAULT 1,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -237,7 +265,7 @@ CREATE TABLE `salas` (
 
 LOCK TABLES `salas` WRITE;
 /*!40000 ALTER TABLE `salas` DISABLE KEYS */;
-INSERT INTO `salas` VALUES (1,'primer piso',2,1);
+INSERT INTO `salas` VALUES (1,'primer planta',2,1),(2,'terrazas',3,1),(3,'segunda planta',1,1);
 /*!40000 ALTER TABLE `salas` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -255,7 +283,7 @@ CREATE TABLE `temp_pedidos` (
   `id_producto` int(11) NOT NULL,
   `id_usuario` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -264,7 +292,7 @@ CREATE TABLE `temp_pedidos` (
 
 LOCK TABLES `temp_pedidos` WRITE;
 /*!40000 ALTER TABLE `temp_pedidos` DISABLE KEYS */;
-INSERT INTO `temp_pedidos` VALUES (1,1,12.00,4,1),(2,1,12.00,5,1),(3,1,12.00,6,1),(4,1,12.00,7,1),(5,1,12.00,8,1),(6,1,24.00,9,1);
+INSERT INTO `temp_pedidos` VALUES (1,1,28.99,1,1);
 /*!40000 ALTER TABLE `temp_pedidos` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -294,7 +322,7 @@ CREATE TABLE `usuarios` (
 
 LOCK TABLES `usuarios` WRITE;
 /*!40000 ALTER TABLE `usuarios` DISABLE KEYS */;
-INSERT INTO `usuarios` VALUES (1,'irvin','Asunción','Y9372185k','81dc9bdb52d04dc20036dbd8313ed055',1,1),(2,'lara','martinez','12345678D','81dc9bdb52d04dc20036dbd8313ed055',2,1),(3,'manuel','ramon','12345678A','81dc9bdb52d04dc20036dbd8313ed055',3,1);
+INSERT INTO `usuarios` VALUES (1,'irvin','Asunción','Y9372185K','81dc9bdb52d04dc20036dbd8313ed055',1,1),(2,'lara','martinez','12345678D','81dc9bdb52d04dc20036dbd8313ed055',2,1),(3,'manuel','ramon','12345678A','81dc9bdb52d04dc20036dbd8313ed055',3,1);
 /*!40000 ALTER TABLE `usuarios` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -378,4 +406,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-07-17 20:38:01
+-- Dump completed on 2024-07-27 20:33:30
