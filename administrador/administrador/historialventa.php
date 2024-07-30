@@ -158,6 +158,10 @@ if (isset($_POST['limpiar_tabla'])) {
     </div>
     <br />
     <div class="container">
+        <!-- Agregar la barra de búsqueda -->
+        <div class="col-12 p-3">
+            <input type="text" id="searchInput" class="form-control" placeholder="Buscar por sala o usuario">
+        </div>
         <div class="card">
             <div class="card-header">
                 Historial pedidos
@@ -309,6 +313,27 @@ if (isset($_POST['limpiar_tabla'])) {
                 document.getElementById('pdfFrame').src = pdfUrl;
                 var myModal = new bootstrap.Modal(document.getElementById('pdfModal'));
                 myModal.show();
+            });
+        });
+    </script>
+    <script>
+        $(document).ready(function() {
+            // Función para filtrar la tabla de pedidos según la Sala o el Usuario
+            $('#searchInput').on('keyup', function() {
+                var searchText = $(this).val().toLowerCase();
+
+                // Recorrer cada fila de la tabla
+                $('.table tbody tr').each(function() {
+                    // Obtener el texto de la Sala y el Usuario
+                    var sala = $(this).find('td:nth-child(1)').text().toLowerCase();
+                    var usuario = $(this).find('td:nth-child(5)').text().toLowerCase();
+
+                    // Verificar si el texto de búsqueda coincide con la Sala o el Usuario
+                    var match = sala.indexOf(searchText) !== -1 || usuario.indexOf(searchText) !== -1;
+
+                    // Mostrar u ocultar la fila según si hay coincidencias
+                    $(this).toggle(match);
+                });
             });
         });
     </script>
