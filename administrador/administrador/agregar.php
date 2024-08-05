@@ -92,7 +92,8 @@ if ($varsesion == null || $varsesion == '') {
 
 <body class="sub_page">
   <div class="hero_area">
-    <?php include 'menuadmin.php'; ?> <!-- Incluir el menú -->
+    <?php include 'menuadmin.php'; ?>
+    <!-- Incluir el menú -->
   </div>
   <div class="container-fluid row">
     <?php
@@ -210,7 +211,9 @@ if ($varsesion == null || $varsesion == '') {
               <div class="form-group">
                 <label for="dni">DNI/NIE:</label>
                 <input type="text" id="dni" class="form-control" name="dni" pattern="[XYZxyz]?\d{7}[TRWAGMYFPDXBNJZSQVHLCKEtrwagmyfpdxbnjzsqvhlcke]|[a-zA-Z]?\d{8}[a-zA-Z]" title="Por favor, introduce un DNI o NIE válido." required maxlength="10">
-                <small class="form-text text-muted">El DNI debe contener una letra seguida de 7 números y otra letra al final. El NIE debe contener una letra (X, Y o Z) opcional, seguida de 7 números y una letra al final.</small>
+                <small class="form-text text-muted">El DNI debe contener una letra seguida de 7 números
+                  y otra letra al final. El NIE debe contener una letra (X, Y o Z) opcional, seguida
+                  de 7 números y una letra al final.</small>
               </div>
               <div class="form-group">
                 <label for="rol">Rol:</label>
@@ -265,7 +268,9 @@ if ($varsesion == null || $varsesion == '') {
               </div>
               <div class="form-group">
                 <label for="editDni">DNI/NIE:</label>
-                <input type="text" id="editDni" class="form-control" name="dni" required maxlength="10">
+                <input type="text" id="editDni" class="form-control" name="dni" pattern="[XYZxyz]?\d{7}[TRWAGMYFPDXBNJZSQVHLCKEtrwagmyfpdxbnjzsqvhlcke]|[a-zA-Z]?\d{8}[a-zA-Z]" required maxlength="9" minlength="9">
+                <small class="form-text text-muted">El DNI debe contener una letra seguida de 7 números y otra letra al final.
+                  El NIE debe contener una letra (X, Y o Z) opcional, seguida de 7 números y una letra al final.</small>
               </div>
               <div class="form-group">
                 <label for="rol">Rol:</label>
@@ -360,9 +365,11 @@ if ($varsesion == null || $varsesion == '') {
               // Actualizar el botón y su estilo
               var btn = $(".cambiar_estado[data-id='" + idUsuario + "']");
               if (response === "1") {
-                btn.removeClass("btn-deshabilitar").addClass("btn-habilitar").text("Habilitado");
+                btn.removeClass("btn-deshabilitar").addClass("btn-habilitar").text(
+                  "Habilitado");
               } else {
-                btn.removeClass("btn-habilitar").addClass("btn-deshabilitar").text("Deshabilitado");
+                btn.removeClass("btn-habilitar").addClass("btn-deshabilitar").text(
+                  "Deshabilitado");
               }
             },
             error: function() {
@@ -387,9 +394,11 @@ if ($varsesion == null || $varsesion == '') {
               if (response === "success") {
                 // Cambio de estado exitoso, actualizar el botón y su estilo
                 if (btn.hasClass("btn-habilitar")) {
-                  btn.removeClass("btn-habilitar").addClass("btn-deshabilitar").text("Deshabilitado");
+                  btn.removeClass("btn-habilitar").addClass(
+                    "btn-deshabilitar").text("Deshabilitado");
                 } else {
-                  btn.removeClass("btn-deshabilitar").addClass("btn-habilitar").text("Habilitado");
+                  btn.removeClass("btn-deshabilitar").addClass(
+                    "btn-habilitar").text("Habilitado");
                 }
               } else {
                 alert("Error al cambiar el estado del usuario.");
