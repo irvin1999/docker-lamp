@@ -255,13 +255,18 @@ if (isset($_POST['limpiar_tabla'])) {
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="facturaModalLabel">Detalles de la Factura</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
                 <div class="modal-body">
                     <!-- Sección de Factura -->
                     <div id="facturaDetalles">
                         <!-- El contenido de esta sección será reemplazado por JavaScript -->
                     </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
                 </div>
             </div>
         </div>
@@ -273,11 +278,16 @@ if (isset($_POST['limpiar_tabla'])) {
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="pdfModalLabel">Ver PDF de la Factura</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
                 <div class="modal-body">
                     <!-- Mostrar el PDF en un iframe -->
                     <iframe id="pdfFrame" src="" style="width: 100%; height: 500px;" frameborder="0"></iframe>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
                 </div>
             </div>
         </div>
